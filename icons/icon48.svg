@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="Tabula icon">
+  <rect width="48" height="48" rx="10" fill="#f5f0e8"/>
+  <rect x="6" y="26" width="36" height="10" rx="3" fill="#7f6547"/>
+  <rect x="10" y="13" width="14" height="11" rx="2.5" fill="#c96f57"/>
+  <rect x="24" y="10" width="15" height="14" rx="2.5" fill="#88a28c"/>
+  <rect x="8" y="24" width="32" height="2.5" rx="1.25" fill="#b8956d" opacity="0.8"/>
+</svg>

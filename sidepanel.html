@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tabula</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="panel-header">
+        <div class="brand">
+          <p class="brand-kicker">Tabula</p>
+          <h1>Your tab desk</h1>
+        </div>
+        <div class="header-actions">
+          <button id="theme-toggle" class="icon-button" type="button" aria-label="Toggle theme">
+            ☾
+          </button>
+          <button id="header-menu-button" class="icon-button" type="button" aria-label="Open more actions">
+            ⋯
+          </button>
+        </div>
+      </header>
+
+      <div id="search-region" class="sticky-region sticky-search">
+        <div class="search-row">
+          <label class="search-shell" for="search-input">
+            <span aria-hidden="true">⌕</span>
+            <input
+              id="search-input"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Search tabs, notes, domains, folders"
+            />
+          </label>
+          <button id="search-clear" class="clear-search hidden" type="button" aria-label="Clear search">
+            ×
+          </button>
+        </div>
+        <div class="command-row">
+          <label class="command-shell" for="command-input">
+            <span aria-hidden="true">✦</span>
+            <input
+              id="command-input"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder='Ask Tabula: "show me what I had open on Tuesday"'
+            />
+          </label>
+          <button id="command-run" class="clear-search" type="button" aria-label="Run command">
+            ↵
+          </button>
+        </div>
+        <div id="command-preview" class="command-preview hidden"></div>
+      </div>
+
+      <div id="duplicate-banner-region" class="sticky-region sticky-banner">
+        <div id="duplicate-banner" class="banner hidden">
+          <span id="duplicate-banner-text"></span>
+          <div class="banner-actions">
+            <button id="duplicate-review" type="button">Review</button>
+            <button id="duplicate-dismiss" type="button" aria-label="Dismiss duplicate banner">×</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="external-drop-zone" class="external-drop-zone hidden">
+        <div class="external-drop-content">
+          <strong>Drop tab here to add to a folder</strong>
+          <select id="external-drop-workspace-select"></select>
+        </div>
+      </div>
+
+      <main id="desk-scroll" class="desk-scroll">
+        <div class="connections-toolbar">
+          <button id="toggle-connections" type="button">Suggest connections</button>
+          <span id="connections-status" class="connections-status">Off</span>
+        </div>
+        <div class="desk-canvas">
+          <svg id="connections-overlay" class="connections-overlay" aria-hidden="true"></svg>
+        </div>
+        <section id="workspace-list" class="workspace-list"></section>
+
+        <section class="divider-section">
+          <div class="section-divider">
+            <span>Unassigned Tabs</span>
+          </div>
+          <section id="unassigned-section" class="drawer-section"></section>
+        </section>
+
+        <section id="saved-sessions-section" class="drawer-section saved-sessions"></section>
+        <section id="empty-state" class="empty-state hidden">
+          <div class="empty-illustration" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <h2>Your desk is clear.</h2>
+          <p>Open a few tabs and Tabula will lay them out like papers on a desk.</p>
+        </section>
+
+        <footer class="panel-footer">
+          <button id="show-workspace-form" class="footer-add-button" type="button">+ Create Folder</button>
+          <form id="workspace-form" class="workspace-form hidden">
+            <label class="form-field">
+              <span>Name</span>
+              <input id="workspace-name-input" name="workspaceName" maxlength="32" required />
+            </label>
+            <fieldset class="swatch-field">
+              <legend>Color</legend>
+              <div id="workspace-color-swatches" class="swatch-list"></div>
+              <label class="custom-hex-row">
+                <span>Custom</span>
+                <input id="workspace-custom-color" type="color" value="#c96f57" />
+                <input id="workspace-custom-color-text" type="text" value="#c96f57" />
+              </label>
+            </fieldset>
+            <div class="form-actions">
+              <button class="primary-button" type="submit">Create Folder</button>
+              <button id="cancel-workspace-form" type="button">Cancel</button>
+            </div>
+          </form>
+        </footer>
+      </main>
+
+      <div id="bulk-bar" class="bulk-bar hidden">
+        <span id="bulk-count"></span>
+        <div class="bulk-actions">
+          <div class="bulk-menu-wrap">
+            <button id="bulk-move-button" type="button">Move to Folder ▾</button>
+            <div id="bulk-move-menu" class="dropdown-panel hidden"></div>
+          </div>
+          <button id="bulk-close-button" type="button">Close Selected</button>
+          <button id="bulk-clear-button" type="button">Clear Selection</button>
+        </div>
+      </div>
+
+      <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+      <input id="import-file-input" type="file" accept="application/json,.json" hidden />
+    </div>
+
+    <div id="menu-portal-root"></div>
+
+    <div id="welcome-overlay" class="screen-overlay hidden">
+      <div class="welcome-screen">
+        <section id="welcome-splash" class="welcome-phase">
+          <p class="brand-kicker">Tabula</p>
+          <h2 class="welcome-wordmark">Tabula</h2>
+          <p class="welcome-tagline">Your tabs, organized like a desk.</p>
+          <div class="welcome-actions">
+            <button id="start-customization" class="primary-button" type="button">Customize Tabula</button>
+            <button id="skip-customization" type="button">Skip — I'll set it up later</button>
+          </div>
+        </section>
+
+        <section id="customization-wizard" class="welcome-phase hidden">
+          <div class="wizard-header">
+            <div id="wizard-progress" class="wizard-progress"></div>
+            <div class="wizard-nav">
+              <button id="wizard-back" type="button">Back</button>
+              <button id="wizard-next" class="primary-button" type="button">Next</button>
+            </div>
+          </div>
+
+          <div id="wizard-step-theme" class="wizard-step">
+            <h3>Pick your vibe</h3>
+            <div id="theme-preset-grid" class="preset-grid"></div>
+            <div class="custom-builder">
+              <h4>Or build your own</h4>
+              <div class="color-picker-grid">
+                <label class="color-control">
+                  <span>Background color</span>
+                  <div class="color-control-row">
+                    <input id="custom-background-color" type="color" value="#f5f0e8" />
+                    <input id="custom-background-text" type="text" value="#f5f0e8" />
+                  </div>
+                </label>
+                <label class="color-control">
+                  <span>Card surface color</span>
+                  <div class="color-control-row">
+                    <input id="custom-surface-color" type="color" value="#fffdf8" />
+                    <input id="custom-surface-text" type="text" value="#fffdf8" />
+                  </div>
+                </label>
+                <label class="color-control">
+                  <span>Accent color</span>
+                  <div class="color-control-row">
+                    <input id="custom-accent-color" type="color" value="#c0694a" />
+                    <input id="custom-accent-text" type="text" value="#c0694a" />
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="wizard-step-font" class="wizard-step hidden">
+            <h3>How should your desk read?</h3>
+            <div id="font-pairing-grid" class="font-pairing-grid"></div>
+          </div>
+
+          <div id="wizard-step-workspaces" class="wizard-step hidden">
+            <h3>Create your first folder</h3>
+            <div id="onboarding-workspaces" class="onboarding-workspaces"></div>
+            <button id="add-onboarding-workspace" class="text-link" type="button">+ Add a second folder</button>
+          </div>
+
+          <div id="wizard-step-summary" class="wizard-step hidden">
+            <h3>You're all set.</h3>
+            <div id="wizard-summary-card" class="summary-card"></div>
+          </div>
+
+          <div class="wizard-preview">
+            <div class="preview-shell">
+              <div class="preview-drawer"></div>
+              <div class="preview-card">
+                <div class="preview-card-title">My favorite article</div>
+                <div class="preview-card-domain">example.com</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div id="tutorial-overlay" class="screen-overlay hidden">
+      <div id="tutorial-highlight" class="tutorial-highlight"></div>
+      <div id="tutorial-tooltip" class="tutorial-tooltip">
+        <div id="tutorial-step-index" class="tutorial-step-index"></div>
+        <h2 id="tutorial-title"></h2>
+        <p id="tutorial-body"></p>
+        <button id="tutorial-next" class="primary-button" type="button">Next</button>
+      </div>
+    </div>
+
+    <div id="settings-overlay" class="screen-overlay hidden">
+      <div class="settings-panel">
+        <header class="settings-header">
+          <button id="settings-close" class="settings-back-button" type="button" aria-label="Back to Tabula">← Back</button>
+          <h2>Settings</h2>
+        </header>
+
+        <nav class="settings-tabs" aria-label="Settings sections">
+          <button id="settings-tab-appearance" class="settings-tab-button is-active" type="button" data-settings-tab="appearance">Appearance</button>
+          <button id="settings-tab-workspaces" class="settings-tab-button" type="button" data-settings-tab="workspaces">Workspaces</button>
+          <button id="settings-tab-ai" class="settings-tab-button" type="button" data-settings-tab="ai">AI</button>
+          <button id="settings-tab-behavior" class="settings-tab-button" type="button" data-settings-tab="behavior">Behavior</button>
+        </nav>
+
+        <div class="settings-sections">
+          <section id="settings-section-appearance" class="settings-section" data-settings-panel="appearance">
+            <h3>Appearance</h3>
+            <div id="settings-theme-presets" class="preset-grid"></div>
+            <div class="color-picker-grid">
+              <label class="color-control">
+                <span>Background</span>
+                <div class="color-control-row">
+                  <input id="settings-background-color" type="color" />
+                  <input id="settings-background-text" type="text" />
+                </div>
+              </label>
+              <label class="color-control">
+                <span>Card surface</span>
+                <div class="color-control-row">
+                  <input id="settings-surface-color" type="color" />
+                  <input id="settings-surface-text" type="text" />
+                </div>
+              </label>
+              <label class="color-control">
+                <span>Accent</span>
+                <div class="color-control-row">
+                  <input id="settings-accent-color" type="color" />
+                  <input id="settings-accent-text" type="text" />
+                </div>
+              </label>
+            </div>
+            <div id="settings-font-pairings" class="font-pairing-grid"></div>
+            <label class="toggle-row">
+              <span>Dark mode</span>
+              <select id="settings-dark-mode">
+                <option value="auto">Auto</option>
+                <option value="light">Always Light</option>
+                <option value="dark">Always Dark</option>
+              </select>
+            </label>
+            <div class="wizard-preview settings-preview">
+              <div class="preview-shell">
+                <div class="preview-drawer"></div>
+                <div class="preview-card">
+                  <div class="preview-card-title">Research</div>
+                  <div class="preview-card-domain">example.com</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="settings-section-workspaces" class="settings-section hidden" data-settings-panel="workspaces">
+            <h3>Folders</h3>
+            <div id="settings-workspaces" class="settings-workspace-list"></div>
+            <section class="settings-section learn-section">
+              <h3>Learn Tabula</h3>
+              <p class="drawer-caption">Replay the guided walkthrough any time you want a refresher on folders, search, notes, and AI features.</p>
+              <button id="replay-tutorial" class="primary-button" type="button">Replay Tutorial</button>
+            </section>
+          </section>
+
+          <section id="settings-section-behavior" class="settings-section hidden" data-settings-panel="behavior">
+            <h3>Behavior</h3>
+            <label class="toggle-row">
+              <span>Open side panel automatically when Chrome starts</span>
+              <input id="behavior-open-on-startup" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <span>Show tab favicons on cards</span>
+              <input id="behavior-show-favicons" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <span>Show domain name on cards</span>
+              <input id="behavior-show-domain" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <span>Compact mode</span>
+              <input id="behavior-compact-mode" type="checkbox" />
+            </label>
+          </section>
+
+          <section id="settings-section-ai" class="settings-section hidden" data-settings-panel="ai">
+            <h3>AI Assistant</h3>
+            <label class="toggle-row">
+              <span>Show folder suggestions on new tabs</span>
+              <input id="ai-suggestions-enabled" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <span>Generate default tab summaries after 3 minutes</span>
+              <input id="ai-summaries-enabled" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <span>Show related tabs and connection lines</span>
+              <input id="ai-related-enabled" type="checkbox" />
+            </label>
+            <label class="toggle-row">
+              <span>Use natural-language assistant bar</span>
+              <input id="ai-command-bar-enabled" type="checkbox" />
+            </label>
+            <p class="drawer-caption">The assistant stays advisory only. Tabula never auto-closes or auto-moves your tabs.</p>
+          </section>
+        </div>
+
+        <div class="settings-footer">
+          <button id="settings-reset-defaults" type="button">Reset to Defaults</button>
+        </div>
+      </div>
+    </div>
+
+    <template id="card-template">
+      <article class="tab-card" tabindex="0">
+        <div class="card-selection">
+          <span class="selection-box" aria-hidden="true"></span>
+        </div>
+        <div class="card-body">
+          <div class="card-main-row">
+            <div class="card-meta">
+              <img class="card-favicon" alt="" />
+              <div class="card-text">
+                <h3 class="card-title"></h3>
+                <p class="card-domain"></p>
+              </div>
+            </div>
+            <div class="card-controls">
+              <button class="assign-folder-button hidden" type="button">Put in Folder</button>
+              <button class="tag-button" type="button" aria-label="Set color tag"></button>
+              <button class="note-toggle" type="button" aria-label="Toggle note">✎</button>
+            </div>
+          </div>
+          <div class="card-inline-note-preview"></div>
+          <div class="card-badges">
+            <span class="duplicate-badge hidden"></span>
+          </div>
+          <div class="suggestion-row hidden">
+            <button class="suggestion-chip" type="button"></button>
+            <button class="suggestion-dismiss" type="button" aria-label="Dismiss suggestion">×</button>
+          </div>
+          <div class="assign-folder-popover hidden"></div>
+          <div class="tag-popover hidden"></div>
+          <div class="note-panel hidden">
+            <div class="note-actions">
+              <button class="summary-action" type="button">Summarize this tab</button>
+              <span class="note-source-label hidden">Auto</span>
+            </div>
+            <textarea class="note-input" maxlength="280" placeholder="Add a sticky note..."></textarea>
+            <div class="note-footer">
+              <span class="note-count">0 / 280</span>
+            </div>
+            <div class="related-tabs hidden">
+              <div class="related-tabs-label">Related tabs in other folders:</div>
+              <div class="related-tabs-list"></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="sidepanel-loader.js?v=20260430e"></script>
+  </body>
+</html>
